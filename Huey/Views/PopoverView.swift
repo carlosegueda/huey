@@ -4,7 +4,7 @@ struct PopoverView: View {
     @Environment(ColorStore.self) private var store
     @State private var toast: String?
     @State private var showSettings = false
-    @AppStorage("closeAfterPick") private var closeAfterPick = true
+    @AppStorage(Prefs.closeAfterPick) private var closeAfterPick = true
     @AppStorage(Prefs.hexLowercase) private var hexLowercase = false      // redibuja al cambiar el estilo del HEX
     @AppStorage(Prefs.hexIncludesHash) private var hexIncludesHash = true
     @AppStorage(Prefs.language) private var language = AppLanguage.english
@@ -12,24 +12,24 @@ struct PopoverView: View {
 
     var body: some View {
         Group {
-              if showSettings {
-                  SettingsView {
-                      withAnimation(.smooth(duration: 0.3)) { showSettings = false }
-                  }
-                  .transition(.opacity)
-              } else {
-                  mainView
-                      .transition(.opacity)
-              }
-          }
-          .padding(14)
-          .frame(width: 280)
-          .overlay(alignment: .top) { toastView }
-          .environment(\.locale, Locale(identifier: language.rawValue))   // idioma de todos los textos de dentro
-      }
-    
-    
-    // MARK: mainview
+            if showSettings {
+                SettingsView {
+                    withAnimation(.smooth(duration: 0.3)) { showSettings = false }
+                }
+                .transition(.opacity)
+            } else {
+                mainView
+                    .transition(.opacity)
+            }
+        }
+        .padding(14)
+        .frame(width: 280)
+        .overlay(alignment: .top) { toastView }
+        .environment(\.locale, Locale(identifier: language.rawValue))   // idioma de todos los textos de dentro
+    }
+
+    // MARK: Pantalla principal
+
     private var mainView: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
@@ -41,25 +41,22 @@ struct PopoverView: View {
             footer
         }
     }
-    
-    // MARK: header
-    
-    
-    private var header: some View{
-        HStack{
-           
+
+    // MARK: Cabecera
+
+    private var header: some View {
+        HStack {
             Text("Huey").fontWeight(.bold)
             Spacer()
             Button {
-                 withAnimation(.smooth(duration: 0.3)) { showSettings = true }
-             }label: {
+                withAnimation(.smooth(duration: 0.3)) { showSettings = true }
+            } label: {
                 Image(systemName: "gearshape")
                     .frame(width: 16, height: 16)   // misma caja que el ← de Configuración
             }
         }
         .frame(height: 24)
     }
-     
 
     // MARK: Muestra grande
 
@@ -90,7 +87,6 @@ struct PopoverView: View {
                             .foregroundStyle(.secondary)
                             .frame(width: 53, alignment: .leading)
                         Text(store.current == nil ? "—" : value)
-                          
                             .lineLimit(1)
                         Spacer()
                     }
@@ -118,17 +114,16 @@ struct PopoverView: View {
                     .help(c.map { Text("\($0.hex) — clic para ver, doble clic para copiar") } ?? Text(verbatim: ""))
                     .onTapGesture(count: 2) { if let c { copy(c.copyText) } }
                     .onTapGesture { if c != nil { store.selected = i } }
-                
             }
             Spacer()
             if !store.history.isEmpty {
                 Button { store.clear() } label: {
                     Image(systemName: "trash")
-                         .font(.system(size: 18))
-                         .foregroundStyle(.secondary)
-                 }
-                 .buttonStyle(.borderless)
-                 .help("Borrar historial")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+                .help("Borrar historial")
             }
         }
     }
@@ -155,11 +150,6 @@ struct PopoverView: View {
         .frame(height: 24)
     }
 
-    
-    
-    
-    
-    
     // MARK: Aviso "Copiado"
 
     @ViewBuilder private var toastView: some View {
@@ -168,7 +158,7 @@ struct PopoverView: View {
                 .font(.caption)
                 .padding(.horizontal, 20).padding(.vertical, 10)
                 .background(.regularMaterial, in: Capsule())
-                .padding(.top,85)
+                .padding(.top, 85)
                 .transition(.scale(scale: 0.95).combined(with: .opacity))
         }
     }
@@ -185,5 +175,4 @@ struct PopoverView: View {
 
 #Preview {
     PopoverView(isPresented: .constant(true)).environment(ColorStore())
-    
 }
