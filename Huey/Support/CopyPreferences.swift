@@ -4,6 +4,7 @@ import Foundation
 enum Prefs {
     static let language = "language"
     static let copyOnPick = "copyOnPick"
+    static let closeAfterPick = "closeAfterPick"
     static let copyFormat = "copyFormat"
     static let hexLowercase = "hexLowercase"
     static let hexIncludesHash = "hexIncludesHash"

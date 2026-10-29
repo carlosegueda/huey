@@ -13,6 +13,5 @@ struct HueyApp: App {
         }
         .menuBarExtraAccess(isPresented: $isMenuPresented)
         .menuBarExtraStyle(.window)
-     
-    }   
+    }
 }

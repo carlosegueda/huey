@@ -18,7 +18,6 @@ final class ColorStore {
         KeyboardShortcuts.onKeyUp(for: .pickColor) { [weak self] in
             self?.pick()
         }
-//        KeyboardShortcuts.Recorder("Atajo:", name: .pickColor)
     }
 
     // MARK: Elegir
@@ -34,13 +33,7 @@ final class ColorStore {
             }
         }
     }
-    
-//    func justshow(){
-//        NSColorSampler().show { color in print(color as Any)
-//            
-//        }
-//    }
-//    
+
     // MARK: Historial
 
     func add(_ rgb: RGB) {
