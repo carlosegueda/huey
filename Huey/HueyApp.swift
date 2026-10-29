@@ -4,14 +4,13 @@ import MenuBarExtraAccess
 @main
 struct HueyApp: App {
     @State private var store = ColorStore()
-    @State private var isMenuPresented = false
 
     var body: some Scene {
         MenuBarExtra("Huey", systemImage: "eyedropper") {
-            PopoverView(isPresented: $isMenuPresented)
+            PopoverView()
                 .environment(store)
         }
-        .menuBarExtraAccess(isPresented: $isMenuPresented)
+        .menuBarExtraAccess(isPresented: $store.isPanelOpen)
         .menuBarExtraStyle(.window)
     }
 }

@@ -4,11 +4,9 @@ struct PopoverView: View {
     @Environment(ColorStore.self) private var store
     @State private var toast: String?
     @State private var showSettings = false
-    @AppStorage(Prefs.closeAfterPick) private var closeAfterPick = true
     @AppStorage(Prefs.hexLowercase) private var hexLowercase = false      // redibuja al cambiar el estilo del HEX
     @AppStorage(Prefs.hexIncludesHash) private var hexIncludesHash = true
     @AppStorage(Prefs.language) private var language = AppLanguage.english
-    @Binding var isPresented: Bool
 
     var body: some View {
         Group {
@@ -133,11 +131,7 @@ struct PopoverView: View {
     private var footer: some View {
         HStack {
             Button {
-                store.pick {
-                    if !closeAfterPick {
-                        isPresented = true
-                    }
-                }
+                store.pick()
             } label: {
                 Image(systemName: "eyedropper")
             }
@@ -174,5 +168,5 @@ struct PopoverView: View {
 }
 
 #Preview {
-    PopoverView(isPresented: .constant(true)).environment(ColorStore())
+    PopoverView().environment(ColorStore())
 }

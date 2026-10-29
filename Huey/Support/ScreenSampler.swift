@@ -34,7 +34,7 @@ final class ScreenSampler {
     private var monitor: Any?
     private var completion: ((NSColor?) -> Void)?
     private var content: SCShareableContent?
-    private var ownApp: [SCRunningApplication] = []
+    private var ownWindows: [SCWindow] = []
     private var capturing = false
     private var needsCapture = false
 
@@ -42,15 +42,18 @@ final class ScreenSampler {
     func show(completion: @escaping (NSColor?) -> Void) {
         guard self.completion == nil else { return }   // ya está abierta
         self.completion = completion
+        start()
+        // La lista de ventanas se pide con la lupa ya en pantalla: así incluye sus ventanas
+        // y se pueden excluir de la captura. Si no, la lupa se capturaría a sí misma.
         Task {
             guard let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true) else {
                 finish(with: nil)
                 return
             }
+            let pid = ProcessInfo.processInfo.processIdentifier
             self.content = content
-            // Las ventanas de Huey (incluida la propia lupa) no deben salir en la captura.
-            ownApp = content.applications.filter { $0.processID == ProcessInfo.processInfo.processIdentifier }
-            start()
+            ownWindows = content.windows.filter { $0.owningApplication?.processID == pid }
+            capture()
         }
     }
 
@@ -94,7 +97,6 @@ final class ScreenSampler {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
         }
-        capture()
     }
 
     private func finish(with color: NSColor?) {
@@ -107,6 +109,8 @@ final class ScreenSampler {
         panels = []
         model.image = nil
         model.color = nil
+        content = nil
+        ownWindows = []
         let completion = self.completion
         self.completion = nil
         completion?(color)
@@ -142,7 +146,7 @@ final class ScreenSampler {
         config.height = Self.gridSize
         config.showsCursor = false
         config.colorSpaceName = CGColorSpace.sRGB
-        let filter = SCContentFilter(display: display, excludingApplications: ownApp, exceptingWindows: [])
+        let filter = SCContentFilter(display: display, excludingWindows: ownWindows)
 
         capturing = true
         Task {

@@ -10,6 +10,9 @@ final class ColorStore {
 
     var current: RGB? { history.indices.contains(selected) ? history[selected] : nil }
 
+    /// Si el panel de la barra de menús está abierto (lo sincroniza MenuBarExtraAccess).
+    var isPanelOpen = false
+
     private static let historyKey = "history"
     private static let maxHistory = 6
 
@@ -24,14 +27,19 @@ final class ColorStore {
 
     // MARK: Elegir
 
-    func pick(onPicked: (() -> Void)? = nil) {
+    /// Lo usa el botón y también el atajo global, así que lo que pase después de elegir
+    /// (copiar, abrir el panel) tiene que decidirse aquí y no en la vista.
+    func pick() {
         let handler: (NSColor?) -> Void = { [weak self] color in
             guard let color, let rgb = RGB(color) else { return } // nil = cancelado con Esc
             Task { @MainActor in
-                self?.add(rgb)
-                let copyOnPick = UserDefaults.standard.object(forKey: Prefs.copyOnPick) as? Bool ?? true
+                guard let self else { return }
+                self.add(rgb)
+                let defaults = UserDefaults.standard
+                let copyOnPick = defaults.object(forKey: Prefs.copyOnPick) as? Bool ?? true
                 if copyOnPick { Clipboard.copy(rgb.copyText) }
-                onPicked?()
+                let closeAfterPick = defaults.object(forKey: Prefs.closeAfterPick) as? Bool ?? true
+                self.isPanelOpen = !closeAfterPick
             }
         }
         // La lupa propia muestra los valores en vivo, pero necesita Grabación de pantalla.
