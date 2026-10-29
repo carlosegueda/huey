@@ -13,6 +13,8 @@ final class ColorStore {
     private static let historyKey = "history"
     private static let maxHistory = 6
 
+    private let sampler = ScreenSampler()
+
     init() {
         load()
         KeyboardShortcuts.onKeyUp(for: .pickColor) { [weak self] in
@@ -23,7 +25,7 @@ final class ColorStore {
     // MARK: Elegir
 
     func pick(onPicked: (() -> Void)? = nil) {
-        NSColorSampler().show { [weak self] color in
+        let handler: (NSColor?) -> Void = { [weak self] color in
             guard let color, let rgb = RGB(color) else { return } // nil = cancelado con Esc
             Task { @MainActor in
                 self?.add(rgb)
@@ -31,6 +33,14 @@ final class ColorStore {
                 if copyOnPick { Clipboard.copy(rgb.copyText) }
                 onPicked?()
             }
+        }
+        // La lupa propia muestra los valores en vivo, pero necesita Grabación de pantalla.
+        // Sin permiso, se pide y mientras tanto se usa la lupa del sistema.
+        if ScreenSampler.hasPermission {
+            sampler.show(completion: handler)
+        } else {
+            ScreenSampler.requestPermission()
+            NSColorSampler().show(selectionHandler: handler)
         }
     }
 

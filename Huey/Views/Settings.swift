@@ -21,9 +21,20 @@ struct SettingsView: View {
             CopySettings()
             LanguagePicker()
             Spacer()
+            Text("Versión \(appVersion)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             Divider()
             footer
         }
+    }
+
+    /// "1.0.0 (1)": Version y Build del target, leídos del Info.plist.
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
     }
 
     private var footer: some View {
