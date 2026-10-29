@@ -1,65 +1,63 @@
 # Huey
 
-Selector de color para la barra de menús de macOS. Elige cualquier píxel de la pantalla con el cuentagotas, cópialo en el formato que necesites y vuelve a tus colores recientes con un clic.
+A menu bar color picker for macOS. Sample any pixel on screen, copy it in the format you need, and return to recent colors with a single click.
 
-![Huey](docs/screenshot.png)
+## Download
 
-## Descargar
+[Download the latest release](https://github.com/carlosegueda/huey/releases/latest)
 
-**[⬇ Descargar la última versión](https://github.com/carlosegueda/huey/releases/latest)**
+Requires macOS 14 Sonoma or later.
 
-Requiere **macOS 14 Sonoma** o posterior.
+## Features
 
-## Funciones
+- **Screen color picker**: sample the color of any pixel using the system magnifier.
+- **Automatic copy** of the selected color.
+- **Six color formats**: HEX, RGB, HSL, HSB, CMYK and OKLCH. Click any value to copy it.
+- **History** of the six most recent colors. Click to view, double-click to copy.
+- **Global keyboard shortcut**: <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>C</kbd> opens the picker from any app.
+- **Settings**:
+  - Copy color on pick
+  - Copy format
+  - Lowercase HEX and optional `#` prefix
+  - Close the panel after picking a color
+  - Launch at login
+  - Interface language: English, Spanish, Portuguese and Russian
 
-- **Cuentagotas de pantalla**: elige el color de cualquier píxel con la lupa del sistema.
-- **Copia automática** del color al elegirlo.
-- **6 formatos**: HEX, RGB, HSL, HSB, CMYK y OKLCH. Haz clic en cualquiera para copiarlo.
-- **Historial** de los últimos 6 colores: clic para verlo, doble clic para copiarlo.
-- **Atajo global** <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>C</kbd> para abrir el cuentagotas desde cualquier app.
-- **Ajustes**:
-  - Copiar al elegir un color
-  - Formato a copiar
-  - HEX en minúsculas e incluir `#`
-  - Cerrar el panel al elegir un color
-  - Abrir al iniciar sesión
-  - Idioma: English, Español, Português, Русский
+## Installation
 
-## Instalación
+1. Download `Huey-x.y.z.zip` from [Releases](https://github.com/carlosegueda/huey/releases/latest) and unzip it.
+2. Move `Huey.app` to the Applications folder.
+3. Open the app. The eyedropper icon appears in the menu bar.
 
-1. Descarga `Huey-x.y.z.zip` desde [Releases](https://github.com/carlosegueda/huey/releases/latest) y descomprímelo.
-2. Mueve `Huey.app` a la carpeta **Aplicaciones**.
-3. Ábrela. Aparecerá el icono del cuentagotas en la barra de menús, junto al reloj.
+### First launch
 
-### "No se puede abrir porque Apple no puede comprobar si contiene software malicioso"
+Huey is not signed with an Apple Developer ID, so macOS blocks it the first time it is opened. To allow it:
 
-Huey no está firmada con una cuenta de Apple Developer, así que macOS la bloquea la primera vez. Para permitirla:
+1. Try to open Huey and dismiss the warning.
+2. Open **System Settings > Privacy & Security**.
+3. Scroll to the message about Huey and click **Open Anyway**.
 
-1. Intenta abrir Huey y cierra el aviso.
-2. Ve a **Ajustes del Sistema › Privacidad y seguridad**.
-3. Baja hasta el mensaje sobre Huey y pulsa **Abrir igualmente**.
-
-Si macOS dice que la app "está dañada", ejecuta esto en la Terminal y vuelve a abrirla:
+If macOS reports that the app is damaged, run the following command in Terminal and open it again:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Huey.app
 ```
 
-## Uso
+## Usage
 
-| Acción | Cómo |
+| Action | How |
 |---|---|
-| Abrir el panel | Clic en el icono de la barra de menús |
-| Elegir un color | Botón del cuentagotas, <kbd>Enter</kbd> con el panel abierto, o <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>C</kbd> desde cualquier app |
-| Cancelar | <kbd>Esc</kbd> con la lupa abierta |
-| Copiar un formato | Clic en su fila |
-| Copiar un color reciente | Doble clic en su círculo |
-| Ajustes | Icono del engranaje |
-| Salir | Icono de encendido |
+| Open the panel | Click the menu bar icon |
+| Pick a color | Click the eyedropper button, press <kbd>Return</kbd> with the panel open, or press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>C</kbd> from any app |
+| Cancel picking | Press <kbd>Esc</kbd> while the magnifier is visible |
+| Copy a format | Click its row |
+| Copy a recent color | Double-click its swatch |
+| Open settings | Click the gear icon |
+| Quit | Click the power icon |
 
-## Compilar desde el código
+## Building from source
 
-Requiere Xcode 16 o posterior.
+Requires Xcode 16 or later.
 
 ```bash
 git clone https://github.com/carlosegueda/huey.git
@@ -67,22 +65,22 @@ cd huey
 open Huey.xcodeproj
 ```
 
-Pulsa <kbd>⌘</kbd> <kbd>R</kbd>. Xcode descarga las dependencias solo:
+Press <kbd>Command</kbd> + <kbd>R</kbd> to build and run. Xcode resolves the Swift Package Manager dependencies automatically:
 
-- [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts): atajo global
-- [MenuBarExtraAccess](https://github.com/orchetect/MenuBarExtraAccess): abrir y cerrar el panel desde el código
+- [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts): global keyboard shortcut
+- [MenuBarExtraAccess](https://github.com/orchetect/MenuBarExtraAccess): programmatic control of the menu bar panel
 
-### Estructura
+### Project structure
 
 ```
 Huey/
-├── HueyApp.swift          # punto de entrada: icono en la barra de menús
+├── HueyApp.swift          # App entry point and menu bar item
 ├── Model/
-│   ├── RGB.swift          # el color y sus conversiones de formato
-│   └── ColorStore.swift   # historial, selección, elegir y copiar
-├── Views/                 # panel principal, ajustes y sus controles
-├── Support/               # portapapeles, atajos, preferencias, idiomas
-├── Localizable.xcstrings  # traducciones
-└── Assets.xcassets        # icono de la app
+│   ├── RGB.swift          # Color value and format conversions
+│   └── ColorStore.swift   # History, selection, picking and copying
+├── Views/                 # Main panel, settings and controls
+├── Support/               # Clipboard, shortcuts, preferences and languages
+├── Localizable.xcstrings  # Translations
+└── Assets.xcassets        # App icon
 HueyTests/
 ```
