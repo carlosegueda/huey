@@ -7,22 +7,25 @@ struct PopoverView: View {
     @AppStorage("closeAfterPick") private var closeAfterPick = true
     @AppStorage(Prefs.hexLowercase) private var hexLowercase = false      // redibuja al cambiar el estilo del HEX
     @AppStorage(Prefs.hexIncludesHash) private var hexIncludesHash = true
+    @AppStorage(Prefs.language) private var language = AppLanguage.english
     @Binding var isPresented: Bool
 
     var body: some View {
-          ZStack(alignment: .topLeading) {
-              mainView
-                  .opacity(showSettings ? 0 : 1)   // invisible, pero sigue ocupando espacio
-                  .disabled(showSettings)          // y no se puede pulsar (ni Enter)
-
+        Group {
               if showSettings {
-                  SettingsView { showSettings = false }
-                      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                  SettingsView {
+                      withAnimation(.smooth(duration: 0.3)) { showSettings = false }
+                  }
+                  .transition(.opacity)
+              } else {
+                  mainView
+                      .transition(.opacity)
               }
           }
           .padding(14)
           .frame(width: 280)
           .overlay(alignment: .top) { toastView }
+          .environment(\.locale, Locale(identifier: language.rawValue))   // idioma de todos los textos de dentro
       }
     
     
@@ -47,11 +50,14 @@ struct PopoverView: View {
            
             Text("Huey").fontWeight(.bold)
             Spacer()
-            Button { NSApplication.shared.terminate(nil)} label: {
-                 Image(systemName: "power")
-             }
-            
+            Button {
+                 withAnimation(.smooth(duration: 0.3)) { showSettings = true }
+             }label: {
+                Image(systemName: "gearshape")
+                    .frame(width: 16, height: 16)   // misma caja que el ← de Configuración
+            }
         }
+        .frame(height: 24)
     }
      
 
@@ -63,7 +69,7 @@ struct PopoverView: View {
             .fill(color?.color ?? Color.secondary.opacity(0.15))
             .frame(height: 72)
             .overlay {
-                Text(color?.hex ?? "Sin color")
+                (color.map { Text(verbatim: $0.hex) } ?? Text("Sin color"))
                     .font(.system(.title3, design: .monospaced).weight(.semibold))
                     .foregroundStyle(color.map { $0.isLight ? Color.black : .white } ?? .secondary)
             }
@@ -109,7 +115,7 @@ struct PopoverView: View {
                     .overlay(Circle().strokeBorder(.secondary.opacity(0.4), lineWidth: 1))
                     .overlay(Circle().strokeBorder(.primary, lineWidth: 2).opacity(c != nil && i == store.selected ? 1 : 0))
                     .frame(width: 26, height: 26)
-                    .help(c.map { "\($0.hex) — clic para ver, doble clic para copiar" } ?? "")
+                    .help(c.map { Text("\($0.hex) — clic para ver, doble clic para copiar") } ?? Text(verbatim: ""))
                     .onTapGesture(count: 2) { if let c { copy(c.copyText) } }
                     .onTapGesture { if c != nil { store.selected = i } }
                 
@@ -131,20 +137,22 @@ struct PopoverView: View {
 
     private var footer: some View {
         HStack {
-            
             Button {
                 store.pick {
                     if !closeAfterPick {
-                                  isPresented = true
-                              }
-                }} label: {
-                 Image(systemName: "eyedropper")
-                }.keyboardShortcut(.defaultAction)
+                        isPresented = true
+                    }
+                }
+            } label: {
+                Image(systemName: "eyedropper")
+            }
+            .keyboardShortcut(.defaultAction)
             Spacer()
-            Button { showSettings = true } label: {
-            Image(systemName: "gearshape")
+            Button { NSApplication.shared.terminate(nil) } label: {
+                Image(systemName: "power")
             }
         }
+        .frame(height: 24)
     }
 
     
@@ -156,21 +164,21 @@ struct PopoverView: View {
 
     @ViewBuilder private var toastView: some View {
         if let toast {
-            Text(toast)
+            Text("Copiado \(toast)")
                 .font(.caption)
                 .padding(.horizontal, 20).padding(.vertical, 10)
                 .background(.regularMaterial, in: Capsule())
-                .padding(.top, 70)
-                .transition(.opacity)
+                .padding(.top,85)
+                .transition(.scale(scale: 0.95).combined(with: .opacity))
         }
     }
 
     private func copy(_ text: String) {
         Clipboard.copy(text)
-        withAnimation { toast = "Copiado \(text)" }
+        withAnimation(.smooth(duration: 0.3)) { toast = text }
         Task {
             try? await Task.sleep(for: .seconds(1.1))
-            withAnimation { if toast == "Copiado \(text)" { toast = nil } }
+            withAnimation(.smooth(duration: 0.3)) { if toast == text { toast = nil } }
         }
     }
 }

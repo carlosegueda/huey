@@ -2,6 +2,7 @@ import Foundation
 
 /// Claves de UserDefaults compartidas entre @AppStorage y el modelo.
 enum Prefs {
+    static let language = "language"
     static let copyOnPick = "copyOnPick"
     static let copyFormat = "copyFormat"
     static let hexLowercase = "hexLowercase"

@@ -6,7 +6,7 @@ struct CopySettings: View {
     @AppStorage(Prefs.hexIncludesHash) private var hexIncludesHash = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        Group {   // sin espaciado propio: usa el del VStack de SettingsView
             Picker("Formato a copiar", selection: $copyFormat) {
                 ForEach(CopyFormat.allCases) { format in
                     Text(format.rawValue).tag(format)
