@@ -106,3 +106,49 @@ extension RGB {
         return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) > 0.4
     }
 }
+
+// MARK: - Crear desde otros espacios
+
+extension RGB {
+    /// h 0–360, s y b 0–1. Se usa el espacio sRGB para que coincida con `hsb`.
+    init(h: Double, s: Double, b: Double) {
+        let ns = NSColor(colorSpace: .sRGB, hue: h / 360, saturation: s, brightness: b, alpha: 1)
+        self = RGB(ns) ?? RGB(r: 0, g: 0, b: 0)
+    }
+
+    /// Acepta "#F80", "ff8800", "rgb(255, 136, 0)", "hsl(32, 100%, 50%)",
+    /// "hsb(32, 100%, 100%)", "cmyk(0%, 47%, 100%, 0%)" o simplemente "255 136 0".
+    init?(parsing input: String) {
+        let text = input.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        // HEX
+        if let m = text.wholeMatch(of: /#?([0-9a-f]{3}|[0-9a-f]{6})/) {
+            var hex = String(m.output.1)
+            if hex.count == 3 { hex = hex.map { "\($0)\($0)" }.joined() }   // F80 → FF8800
+            guard let v = UInt32(hex, radix: 16) else { return nil }
+            self.init(r: Int(v >> 16 & 0xFF), g: Int(v >> 8 & 0xFF), b: Int(v & 0xFF))
+            return
+        }
+
+        let n = text.matches(of: /\d+(\.\d+)?/).compactMap { Double($0.output.0) }
+        func clamp(_ v: Double, _ hi: Double) -> Double { min(max(v, 0), hi) }
+
+        if text.hasPrefix("hsl"), n.count >= 3 {
+            // HSL → HSB y se reutiliza el init de arriba
+            let h = clamp(n[0], 360), s = clamp(n[1], 100) / 100, l = clamp(n[2], 100) / 100
+            let b = l + s * min(l, 1 - l)
+            self.init(h: h, s: b == 0 ? 0 : 2 * (1 - l / b), b: b)
+        } else if text.hasPrefix("hsb") || text.hasPrefix("hsv"), n.count >= 3 {
+            self.init(h: clamp(n[0], 360), s: clamp(n[1], 100) / 100, b: clamp(n[2], 100) / 100)
+        } else if text.hasPrefix("cmyk"), n.count >= 4 {
+            let (c, m, y, k) = (clamp(n[0], 100) / 100, clamp(n[1], 100) / 100,
+                                clamp(n[2], 100) / 100, clamp(n[3], 100) / 100)
+            func ch(_ v: Double) -> Int { Int((255 * (1 - v) * (1 - k)).rounded()) }
+            self.init(r: ch(c), g: ch(m), b: ch(y))
+        } else if n.count >= 3 {   // "rgb(…)" o tres números sueltos
+            self.init(r: Int(clamp(n[0], 255).rounded()), g: Int(clamp(n[1], 255).rounded()), b: Int(clamp(n[2], 255).rounded()))
+        } else {
+            return nil
+        }
+    }
+}

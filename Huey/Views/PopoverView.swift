@@ -4,6 +4,7 @@ struct PopoverView: View {
     @Environment(ColorStore.self) private var store
     @State private var toast: String?
     @State private var showSettings = false
+    @State private var showPicker = false
     @AppStorage(Prefs.hexLowercase) private var hexLowercase = false      // redibuja al cambiar el estilo del HEX
     @AppStorage(Prefs.hexIncludesHash) private var hexIncludesHash = true
     @AppStorage(Prefs.language) private var language = AppLanguage.english
@@ -14,6 +15,12 @@ struct PopoverView: View {
                 SettingsView {
                     withAnimation(.smooth(duration: 0.3)) { showSettings = false }
                 }
+                .transition(.opacity)
+            } else if showPicker {
+                ColorPickerView(
+                    onBack: { withAnimation(.smooth(duration: 0.3)) { showPicker = false } },
+                    onCopy: copy
+                )
                 .transition(.opacity)
             } else {
                 mainView
@@ -33,7 +40,7 @@ struct PopoverView: View {
             header
             Divider()
             swatch
-            formatList
+            FormatList(rgb: store.current, onCopy: copy)
             historyRow
             Divider()
             footer
@@ -68,34 +75,6 @@ struct PopoverView: View {
                     .font(.system(.title3, design: .monospaced).weight(.semibold))
                     .foregroundStyle(color.map { $0.isLight ? Color.black : .white } ?? .secondary)
             }
-    }
-
-    // MARK: Formatos
-
-    private var formatList: some View {
-        VStack(spacing: 2) {
-            let rgb = store.current ?? RGB(r: 0, g: 0, b: 0)
-            ForEach(rgb.formats, id: \.label) { item in
-                let value = item.label == CopyFormat.hex.rawValue ? rgb.styledHex : item.value
-                Button {
-                    copy(value)
-                } label: {
-                    HStack {
-                        Text(item.label)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 53, alignment: .leading)
-                        Text(store.current == nil ? "—" : value)
-                            .lineLimit(1)
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 8)
-                }
-                .buttonStyle(.plain)
-                .disabled(store.current == nil)
-            }
-        }
     }
 
     // MARK: Recientes
@@ -136,6 +115,12 @@ struct PopoverView: View {
                 Image(systemName: "eyedropper")
             }
             .keyboardShortcut(.defaultAction)
+            Button {
+                withAnimation(.smooth(duration: 0.3)) { showPicker = true }
+            } label: {
+                Image(systemName: "paintpalette")
+            }
+            .help("Selector de color")
             Spacer()
             Button { NSApplication.shared.terminate(nil) } label: {
                 Image(systemName: "power")
