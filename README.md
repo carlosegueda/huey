@@ -2,6 +2,12 @@
 
 A menu bar color picker for macOS. Sample any pixel on screen, copy it in the format you need, and return to recent colors with a single click.
 
+<p align="center">
+  <img src="docs/screenshots/main-panel.png" alt="Huey main panel" width="260">
+  <img src="docs/screenshots/color-picker.png" alt="Huey color picker" width="260">
+  <img src="docs/screenshots/settings.png" alt="Huey settings" width="260">
+</p>
+
 ## Download
 
 [Download the latest release](https://github.com/carlosegueda/huey/releases/latest)
@@ -11,6 +17,7 @@ Requires macOS 14 Sonoma or later.
 ## Features
 
 - **Screen color picker**: sample the color of any pixel using the system magnifier.
+- **Color picker**: choose a color with a saturation/brightness area and a hue slider, or type or paste a value in HEX, `rgb()`, `hsl()`, `hsb()` or `cmyk()`. Click the preview to copy it, or add it to recent colors.
 - **Automatic copy** of the selected color.
 - **Six color formats**: HEX, RGB, HSL, HSB, CMYK and OKLCH. Click any value to copy it.
 - **History** of the six most recent colors. Click to view, double-click to copy.
@@ -48,8 +55,12 @@ xattr -dr com.apple.quarantine /Applications/Huey.app
 | Action | How |
 |---|---|
 | Open the panel | Click the menu bar icon |
-| Pick a color | Click the eyedropper button, press <kbd>Return</kbd> with the panel open, or press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>C</kbd> from any app |
+| Pick a color from the screen | Click the eyedropper button, press <kbd>Return</kbd> with the panel open, or press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>C</kbd> from any app |
 | Cancel picking | Press <kbd>Esc</kbd> while the magnifier is visible |
+| Open the color picker | Click the palette button |
+| Enter a color value | Type it in the color picker field, or click the clipboard button to paste it |
+| Copy the color picker's color | Click its preview |
+| Save it to recent colors | Click the <kbd>+</kbd> button next to the preview |
 | Copy a format | Click its row |
 | Copy a recent color | Double-click its swatch |
 | Open settings | Click the gear icon |
